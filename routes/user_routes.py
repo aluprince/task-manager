@@ -4,11 +4,13 @@ from flask import request, Blueprint
 
 auth_bp = Blueprint("auth", __name__)
 
+
 @auth_bp.route("/register", methods=["POST"])
 def register():
     data = request.json
     print(data)
     return register_user(data)
+
 
 @auth_bp.route("/login", methods=["POST"])
 def login():
