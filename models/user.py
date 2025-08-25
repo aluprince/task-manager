@@ -28,6 +28,15 @@ class User(Document):
         print("Everything has been updated Successfully")
         return task
 
+    def delete_task(self, task_title):
+        task_to_delete = next(t for t in self.tasks if t.title == task_title)
+        if not task_to_delete:
+            raise ValueError("This task doesn't exist")
+        self.tasks.remove(task_to_delete)
+        self.save()
+        print(f"{task_title} deleted Successfully")
+        return True
+
 
 
 

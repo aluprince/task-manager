@@ -1,13 +1,30 @@
-from flask import Flask
+import config.db
+from flask import Flask, render_template, request, jsonify
 from routes.user_routes import auth_bp
 from routes.task_routes import task_bp
-from config import db
+from dotenv import load_dotenv, find_dotenv
+from routes.task_routes import token_required
+
+load_dotenv(find_dotenv())
 
 app = Flask(__name__)
 
 @app.route("/")
 def home():
-    return "Welcome home still under Development"
+    return render_template("index.html")
+
+@app.route("/register")
+def register():
+    return render_template("register.html")
+
+@app.route("/login")
+def login():
+    return render_template("login.html")
+
+@app.route("/dashboard")
+@token_required
+def dashboard():
+    return render_template("dashboard.html")
 
 
 # blueprints
