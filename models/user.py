@@ -11,6 +11,22 @@ class User(Document):
     tasks = ListField(EmbeddedDocumentField(Tasks))
     meta = {"collection": "Users"} #setting collection name
 
+    def update_status(self, task_title):
+        """updates user status"""
+        for task in self.tasks:
+            if task.title == task_title:
+                if task.status == "pending":
+                    task.status = "completed"
+                    self.save()
+                    return "Task status updated to completed"
+                elif task.status == "completed":
+                    task.status = "pending"
+                    self.save()
+                    return "Task status updated to pending"
+                
+        return "No tasks available to update"
+                
+
     def update_task(self, task_title, **kwargs):
         """updates tasks by changing key to new value"""
         task = None
@@ -36,11 +52,6 @@ class User(Document):
         self.save()
         print(f"{task_title} deleted Successfully")
         return True
-
-
-
-
-
 
 
 

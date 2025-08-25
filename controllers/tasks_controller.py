@@ -47,15 +47,17 @@ def read_tasks(username):
         print(f"This is the cause: {e}"), 400
 
 
-def update_task(username, task_title, **kwargs):
+def update_task_status(username, task_title):
+    """ This function updates the user status for now, later it will update tasks"""
+
     # Later change to get user by id instead of relying on name which might be the same
-    """This function takes username, task title and any **kwargs which can be either(title, description, due_date, status)"""
     try:
         user = User.objects(name=username).first()
         print(user)
         if not user:
             raise ValueError("User does not exist")
-        user.update_task(task_title, **kwargs)
+        # user.update_task(task_title, **kwargs)
+        user.update_status(task_title)
         user.save()
         return jsonify(message="Tasks has been updated successfully")
 

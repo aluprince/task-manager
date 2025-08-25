@@ -2,9 +2,10 @@ const taskList = document.getElementById("taskList");
 const API_BASE = "http://127.0.0.1:5000"; // Flask Server
 
 // Create Task Element
-function createTaskElement(title, description, due_date) {
+function createTaskElement(id, title, description, due_date) {
   const li = document.createElement("li");
   li.className = "p-4 border rounded flex justify-between items-center";
+  li.dataset.id = id; 
 
   li.innerHTML = `
     <div>
@@ -20,23 +21,45 @@ function createTaskElement(title, description, due_date) {
   `;
 
   // Toggle Status
-  li.querySelector(".toggle-status").addEventListener("click", (e) => {
+  li.querySelector(".toggle-status").addEventListener("click", async (e) => {
     const statusLabel = li.querySelector(".status-label");
+    const taskId = li.dataset.id;
     const button = e.target;
 
-    if (statusLabel.textContent.includes("Pending")) {
-      statusLabel.textContent = "Status: Done";
-      statusLabel.classList.replace("text-yellow-600", "text-green-600");
-      button.textContent = "Mark Pending";
-      button.classList.replace("bg-yellow-500", "bg-green-500");
-    } else {
-      statusLabel.textContent = "Status: Pending";
-      statusLabel.classList.replace("text-green-600", "text-yellow-600");
-      button.textContent = "Mark Done";
-      button.classList.replace("bg-green-500", "bg-yellow-500");
+    const newStatus = statusLabel.textContent.includes("Pending") ? "done" : "pending";
+
+    try {
+      const response = await fetch(`${API_BASE}/update-task`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ task_title: title, newStatus }),
+        credentials: "include"
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        // update UI
+        statusLabel.textContent = `Status: ${newStatus.charAt(0).toUpperCase() + newStatus.slice(1)}`;
+        if (newStatus === "done") {
+          statusLabel.classList.replace("text-yellow-600", "text-green-600");
+          button.textContent = "Mark Pending";
+          button.classList.replace("bg-yellow-500", "bg-green-500");
+        } else {
+          statusLabel.classList.replace("text-green-600", "text-yellow-600");
+          button.textContent = "Mark Done";
+          button.classList.replace("bg-green-500", "bg-yellow-500");
+        }
+      } else {
+        alert(data.error || "Failed to update status");
+      }
+    } catch (err) {
+      console.log("Error:", err);
+      alert("Failed to update status");
     }
   });
 
+
+// Delete Task
 li.querySelector(".delete-task").addEventListener("click", async (e) => {
   const deleteButton = e.target;
   try {
@@ -114,7 +137,7 @@ async function loadUserTasks(){
 
     if (data.tasks && data.tasks.length > 0) {
         data.tasks.forEach(task => {
-            const taskEl = createTaskElement(task.title, task.description, task.due_date);
+            const taskEl = createTaskElement(task.id, task.title, task.description, task.due_date);
             container.appendChild(taskEl);
         });
     } else {

@@ -1,5 +1,5 @@
 from flask import jsonify, Blueprint, request
-from controllers.tasks_controller import create_task, read_tasks, update_task, delete_tasks
+from controllers.tasks_controller import create_task, read_tasks, update_task_status, delete_tasks
 from functools import wraps
 from Jwt_helpers.helper_tokens import decode_token
 from dotenv import load_dotenv, find_dotenv
@@ -77,12 +77,15 @@ def read():
 @token_required
 def update(**kwargs):
     current_user = request.user
+    username = current_user["user_identity"]["name"]
+    print(username)
     data = request.get_json()
     task_title = data.get("task_title")
+    print(f"This is the task title: {task_title}")
 
     kwargs = {key: value for key, value in data.items() if key not in ["name", "task_title"]}
 
-    return update_task(username=current_user["name"], task_title=task_title, **kwargs)
+    return update_task_status(task_title=task_title, username=username), 201
 
 
 @task_bp.route("/delete", methods=["DELETE"])
